@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Mac
+.DS_Store
+
+# Virtual env (yours is inside src)
+src/venv/
+
+# Dataset + outputs (inside src)
+src/train/
+src/test/
+src/kaggle/
+src/results/

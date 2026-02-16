@@ -6,7 +6,7 @@ def _split_data(train_directory, test_directory, batch_size, validation_split):
     train_dataset, validation_dataset = image_dataset_from_directory(
         train_directory,
         label_mode='categorical',
-        color_mode='rgb',
+        color_mode='grayscale', #CHANGED FROM RGB
         batch_size=batch_size,
         image_size=image_size,
         validation_split=validation_split,
@@ -17,7 +17,7 @@ def _split_data(train_directory, test_directory, batch_size, validation_split):
     test_dataset = image_dataset_from_directory(
         test_directory,
         label_mode='categorical',
-        color_mode='rgb',
+        color_mode='grayscale', #CHANGED FROM RGB
         batch_size=batch_size,
         image_size=image_size,
         shuffle=False
