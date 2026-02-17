@@ -5,11 +5,20 @@ __pycache__/
 # Mac
 .DS_Store
 
-# Virtual env (yours is inside src)
+# Virtual environments
+.venv/
 src/venv/
+venv/
 
 # Dataset + outputs (inside src)
 src/train/
 src/test/
 src/kaggle/
 src/results/
+
+# Trained models and history
+*.keras
+*.npy
+
+# PDF assignment doc
+*.pdf

@@ -15,10 +15,11 @@ models = {
 }
 
 def plot_history(history):
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
+    h = history if isinstance(history, dict) else history.history
+    acc = h['accuracy']
+    val_acc = h['val_accuracy']
+    loss = h['loss']
+    val_loss = h['val_loss']
 
     epochs_range = range(1, len(acc) + 1)
 
@@ -40,9 +41,9 @@ def plot_history(history):
 
 if __name__ == "__main__":
     # if you want to load your model later, you can use:
-    # model = Model.load_model("name_of_your_model.keras")
+    # model = Model.load_model("results/name_of_your_model.keras")
     # to load your history and plot it again, you can use:
-    # history = np.load('results/name_of_your_model.npy', allow_pickle='TRUE').item()
+    # history = np.load('results/name_of_your_model.npy', allow_pickle=True).item()
     # plot_history(history)
     #
     # Your code should change the number of epochs
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     filename = 'results/{}.keras'.format(model_name)
 
     model.save_model(filename)
-    np.save('results/{}.npy'.format(model_name), history)
+    np.save('results/{}.npy'.format(model_name), history.history)
 
     print('* Model saved as {}'.format(filename))
     plot_history(history)
