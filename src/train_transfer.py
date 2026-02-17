@@ -27,6 +27,8 @@ def plot_history_diff(initial_hist, transfered_hist):
     plt.grid(True)
     plt.legend()
     plt.xlabel('Epoch')
+    plt.title("Far Transfer from Facial Recognition to Cats vs Dogs")
+    plt.savefig("section8_transfer_plot.png", dpi=150, bbox_inches="tight")
     plt.show()
 
 if __name__ == "__main__":

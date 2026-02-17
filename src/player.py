@@ -1,8 +1,25 @@
+import os
 from config import BOARD_SIZE, categories, image_size
 from tensorflow.keras import models
 from tensorflow.keras.models import load_model
 import numpy as np
 import tensorflow as tf
+
+_MODEL_FILENAME = "basic_model_100_epochs_timestamp_1771304740.keras"
+
+def _get_model_path():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    p = os.path.join(script_dir, "results", _MODEL_FILENAME)
+    if os.path.isfile(p):
+        return p
+    cwd = os.getcwd()
+    p2 = os.path.join(cwd, "results", _MODEL_FILENAME)
+    if os.path.isfile(p2):
+        return p2
+    raise FileNotFoundError(
+        f"Model not found. Tried:\n  {p}\n  {p2}\n"
+        f"Put the .keras file in src/results/ and run from src/"
+    )
 
 class TicTacToePlayer:
     def get_move(self, board_state):
@@ -103,7 +120,8 @@ class UserWebcamPlayer:
     
     def _get_emotion(self, img) -> int:
         if getattr(self, '_model', None) is None:
-            self._model = load_model('results/best_model.keras')
+            path = os.path.realpath(_get_model_path())
+            self._model = load_model(path)
         img = cv2.resize(img, image_size)
         img = np.expand_dims(img, axis=-1).astype(np.float32) / 255.0
         img_batch = np.expand_dims(img, axis=0)
