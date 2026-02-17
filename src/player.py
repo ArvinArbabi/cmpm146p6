@@ -1,7 +1,11 @@
 from config import BOARD_SIZE, categories, image_size
 from tensorflow.keras import models
+from tensorflow.keras.models import load_model
 import numpy as np
 import tensorflow as tf
+
+# Path to your best trained facial expression model (.keras from Step 5 or 6)
+EMOTION_MODEL_PATH = "results/best_model.keras"
 
 class TicTacToePlayer:
     def get_move(self, board_state):
@@ -33,6 +37,9 @@ from matplotlib.image import imread
 import cv2
 
 class UserWebcamPlayer:
+    def __init__(self, model_path=EMOTION_MODEL_PATH):
+        self.model = load_model(model_path)
+
     def _process_frame(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         width, height = frame.shape
@@ -94,21 +101,18 @@ class UserWebcamPlayer:
             raise e
     
     def _get_emotion(self, img) -> int:
-        # Your code goes here
-        #
-        # img an np array of size NxN (square), each pixel is a value between 0 to 255
-        # you have to resize this to image_size before sending to your model
-        # to show the image here, you can use:
-        # import matplotlib.pyplot as plt
-        # plt.imshow(img, cmap='gray', vmin=0, vmax=255)
-        # plt.show()
-        #
-        # You have to use your saved model, use resized img as input, and get one classification value out of it
-        # The classification value should be 0, 1, or 2 for neutral, happy or surprise respectively
-
-        # return an integer (0, 1 or 2), otherwise the code will throw an error
-        return 1
-        pass
+        # Resize to match model input (64x64)
+        img = cv2.resize(img, image_size)
+        # Add channel dimension -> (64, 64, 1)
+        img = np.expand_dims(img, axis=-1)
+        # Scale to 0-1
+        img = img.astype(np.float32) / 255.0
+        # Add batch dimension -> (1, 64, 64, 1)
+        img_batch = np.expand_dims(img, axis=0)
+        pred = self.model.predict(img_batch, verbose=0)
+        # 0=neutral, 1=happy, 2=surprise
+        emotion = int(np.argmax(pred[0]))
+        return emotion
     
     def get_move(self, board_state):
         row, col = None, None
