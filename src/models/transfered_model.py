@@ -3,14 +3,10 @@ from tensorflow.keras import Sequential, layers, Model as KerasModel
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 
-# Path to your best trained facial model from Step 5 or 6
-FACIAL_MODEL_PATH = "results/best_model.keras"
-
 
 class TransferedModel(Model):
     def _define_model(self, input_shape, categories_count):
-        base = load_model(FACIAL_MODEL_PATH)
-        # Remove final softmax layer; keep feature extractor
+        base = load_model("results/best_model.keras")
         base_cut = KerasModel(inputs=base.input, outputs=base.layers[-2].output)
         for layer in base_cut.layers:
             layer.trainable = False

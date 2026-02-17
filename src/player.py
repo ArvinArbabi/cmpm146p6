@@ -4,9 +4,6 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import tensorflow as tf
 
-# Path to your best trained facial expression model (.keras from Step 5 or 6)
-EMOTION_MODEL_PATH = "results/best_model.keras"
-
 class TicTacToePlayer:
     def get_move(self, board_state):
         raise NotImplementedError()
@@ -37,9 +34,6 @@ from matplotlib.image import imread
 import cv2
 
 class UserWebcamPlayer:
-    def __init__(self, model_path=EMOTION_MODEL_PATH):
-        self.model = load_model(model_path)
-
     def _process_frame(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         width, height = frame.shape
@@ -52,9 +46,13 @@ class UserWebcamPlayer:
         import cv2
         cv2.namedWindow("preview")
         vc = cv2.VideoCapture(0)
-        if vc.isOpened(): # try to get the first frame
+        frame = None
+        if vc.isOpened():  # try to get the first frame
             rval, frame = vc.read()
-            frame = self._process_frame(frame)
+            if rval:
+                frame = self._process_frame(frame)
+            else:
+                rval = False
         else:
             rval = False
         while rval:
@@ -67,7 +65,7 @@ class UserWebcamPlayer:
 
         vc.release()
         cv2.destroyWindow("preview")
-        return frame
+        return frame  # may be None if camera never opened
 
     def _print_reference(self, row_or_col):
         print('reference:')
@@ -87,6 +85,9 @@ class UserWebcamPlayer:
             row_or_col = 'row' if is_row else 'col'
             self._print_reference(row_or_col)
             img = self._access_webcam()
+            if img is None:
+                print('Camera unavailable. Use text input (enter 0, 1, or 2):')
+                return self._get_row_or_col_by_text()
             emotion = self._get_emotion(img)
             if type(emotion) is not int or emotion not in range(len(categories)):
                 print('Invalid emotion number {}'.format(emotion))
@@ -101,18 +102,13 @@ class UserWebcamPlayer:
             raise e
     
     def _get_emotion(self, img) -> int:
-        # Resize to match model input (64x64)
+        if getattr(self, '_model', None) is None:
+            self._model = load_model('results/best_model.keras')
         img = cv2.resize(img, image_size)
-        # Add channel dimension -> (64, 64, 1)
-        img = np.expand_dims(img, axis=-1)
-        # Scale to 0-1
-        img = img.astype(np.float32) / 255.0
-        # Add batch dimension -> (1, 64, 64, 1)
+        img = np.expand_dims(img, axis=-1).astype(np.float32) / 255.0
         img_batch = np.expand_dims(img, axis=0)
-        pred = self.model.predict(img_batch, verbose=0)
-        # 0=neutral, 1=happy, 2=surprise
-        emotion = int(np.argmax(pred[0]))
-        return emotion
+        pred = self._model.predict(img_batch, verbose=0)
+        return int(np.argmax(pred[0]))
     
     def get_move(self, board_state):
         row, col = None, None

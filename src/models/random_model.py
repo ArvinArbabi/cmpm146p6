@@ -4,13 +4,10 @@ from tensorflow.keras import Sequential, layers, Model as KerasModel
 from tensorflow.keras.models import load_model
 from tensorflow.keras.optimizers import Adam
 
-# Path to your best trained facial model (same file as transfer; weights will be randomized)
-FACIAL_MODEL_PATH = "results/best_model.keras"
-
 
 class RandomModel(Model):
     def _define_model(self, input_shape, categories_count):
-        base = load_model(FACIAL_MODEL_PATH)
+        base = load_model("results/best_model.keras")
         base_cut = KerasModel(inputs=base.input, outputs=base.layers[-2].output)
         for layer in base_cut.layers:
             layer.trainable = False
@@ -34,7 +31,4 @@ class RandomModel(Model):
         for layer in model.layers:
             w = layer.get_weights()
             if w:
-                new_weights = [
-                    np.random.randn(*arr.shape).astype(np.float32) * 0.01 for arr in w
-                ]
-                layer.set_weights(new_weights)
+                layer.set_weights([np.random.randn(*arr.shape).astype(np.float32) * 0.01 for arr in w])

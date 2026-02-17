@@ -5,11 +5,8 @@ from config import image_size, categories
 import matplotlib.pyplot as plt
 import time
 
-# 2-class transfer: grayscale 64x64 to match facial model
-# -------------
 input_shape = (image_size[0], image_size[1], 1)
 categories_count = 2
-# -------------
 
 models = {
     'transfered_model': TransferedModel,
@@ -33,7 +30,7 @@ def plot_history_diff(initial_hist, transfered_hist):
     plt.show()
 
 if __name__ == "__main__":
-    epochs = 15  # Adjust if needed to see transfer effect
+    epochs = 15
     print('* Data preprocessing')
     train_dataset, validation_dataset, test_dataset = get_transfer_datasets()
     histories = []
@@ -48,5 +45,4 @@ if __name__ == "__main__":
         print('* Confusion Matrix for {}'.format(name))
         print(model.get_confusion_matrix(test_dataset))
     assert len(histories) == 2, "The number of trained models is not equal to two"
-    # histories[0]=transfered, histories[1]=random; plot: initial (no transfer) vs transfered
     plot_history_diff(histories[1], histories[0])
