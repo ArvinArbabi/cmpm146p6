@@ -6,7 +6,7 @@ from tensorflow.keras.optimizers import Adam
 
 class TransferedModel(Model):
     def _define_model(self, input_shape, categories_count):
-        base = load_model("results/best_model.keras")
+        base = load_model("results/basic_model_50_epochs_timestamp_1771303228.keras")
         base_cut = KerasModel(inputs=base.input, outputs=base.layers[-2].output)
         for layer in base_cut.layers:
             layer.trainable = False
