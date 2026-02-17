@@ -14,9 +14,8 @@ venv/
 src/train/
 src/test/
 src/kaggle/
-src/results/
 
-# Trained models and history
+# Training history
 *.npy
 
 # PDF assignment doc

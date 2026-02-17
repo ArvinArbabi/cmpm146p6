@@ -48,7 +48,7 @@ if __name__ == "__main__":
     #
     # Your code should change the number of epochs
     # I changed it from 1 to 15 to 30
-    epochs = 30
+    epochs = 50
 
     print('* Data preprocessing')
     train_dataset, validation_dataset, test_dataset = get_datasets()
