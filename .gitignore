@@ -17,8 +17,10 @@ src/kaggle/
 src/results/
 
 # Trained models and history
-*.keras
 *.npy
 
 # PDF assignment doc
 *.pdf
+
+# LaTeX
+*.tex
