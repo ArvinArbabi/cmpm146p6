@@ -14,11 +14,12 @@ venv/
 src/train/
 src/test/
 src/kaggle/
-src/results/
 
-# Trained models and history
-*.keras
+# Training history
 *.npy
 
 # PDF assignment doc
 *.pdf
+
+# LaTeX
+*.tex

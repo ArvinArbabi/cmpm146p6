@@ -3,6 +3,7 @@ from preprocess import get_datasets
 from models.basic_model import BasicModel
 from models.model import Model
 from config import image_size
+from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
 import matplotlib.pyplot as plt
 import time
 
@@ -48,24 +49,32 @@ if __name__ == "__main__":
     #
     # Your code should change the number of epochs
     # I changed it from 1 to 15 to 30
-    epochs = 30
+    epochs = 100
 
     print('* Data preprocessing')
     train_dataset, validation_dataset, test_dataset = get_datasets()
 
-    # Optional one-time sanity check (uncomment if you want)
-    # for x, y in train_dataset.take(1):
-    #     print("batch x shape:", x.shape)  # should be (batch, H, W, 1)
-    #     print("batch y shape:", y.shape)  # should be (batch, 3)
-
     name = 'basic_model'
     model_class = models[name]
 
-    print('* Training {} for {} epochs'.format(name, epochs))
+    print('* Training {} for up to {} epochs'.format(name, epochs))
     model = model_class(input_shape, categories_count)
     model.print_summary()
 
-    history = model.train_model(train_dataset, validation_dataset, epochs)
+    model_name = '{}_{}_epochs_timestamp_{}'.format(name, epochs, int(time.time()))
+    best_model_path = 'results/{}.keras'.format(model_name)
+
+    callbacks = [
+        ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5,
+                          min_lr=1e-6, verbose=1),
+        EarlyStopping(monitor='val_accuracy', patience=15,
+                      restore_best_weights=True, verbose=1),
+        ModelCheckpoint(best_model_path, monitor='val_accuracy',
+                        save_best_only=True, verbose=1),
+    ]
+
+    history = model.train_model(train_dataset, validation_dataset, epochs,
+                                callbacks=callbacks)
 
     print('* Evaluating {}'.format(name))
     model.evaluate(test_dataset)
@@ -73,11 +82,8 @@ if __name__ == "__main__":
     print('* Confusion Matrix for {}'.format(name))
     print(model.get_confusion_matrix(test_dataset))
 
-    model_name = '{}_{}_epochs_timestamp_{}'.format(name, epochs, int(time.time()))
-    filename = 'results/{}.keras'.format(model_name)
-
-    model.save_model(filename)
+    model.save_model(best_model_path)
     np.save('results/{}.npy'.format(model_name), history.history)
 
-    print('* Model saved as {}'.format(filename))
+    print('* Best model saved as {}'.format(best_model_path))
     plot_history(history)

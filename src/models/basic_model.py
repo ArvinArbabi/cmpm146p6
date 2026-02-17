@@ -29,14 +29,16 @@ class BasicModel(Model):
             layers.MaxPooling2D(),
 
             layers.GlobalAveragePooling2D(),
+            layers.Dense(128, activation="relu"),
+            layers.Dropout(0.3),
             layers.Dense(64, activation="relu"),
-            layers.Dropout(0.4),
+            layers.Dropout(0.3),
             layers.Dense(categories_count, activation="softmax"),
         ])
 
     def _compile_model(self):
         self.model.compile(
-            optimizer=Adam(learning_rate=1e-4),
+            optimizer=Adam(learning_rate=1e-3),
             loss="categorical_crossentropy",
             metrics=["accuracy"],
         )
