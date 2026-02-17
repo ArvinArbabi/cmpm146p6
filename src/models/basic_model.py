@@ -29,6 +29,8 @@ class BasicModel(Model):
             layers.MaxPooling2D(),
 
             layers.GlobalAveragePooling2D(),
+            layers.Dense(128, activation="relu"),
+            layers.Dropout(0.3),
             layers.Dense(64, activation="relu"),
             layers.Dropout(0.3),
             layers.Dense(categories_count, activation="softmax"),
