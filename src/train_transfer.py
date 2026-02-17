@@ -5,11 +5,8 @@ from config import image_size, categories
 import matplotlib.pyplot as plt
 import time
 
-# Your code should change these values based on your choice of dataset for the transfer task
-# -------------
-input_shape = (image_size[0], image_size[1], 3)
-categories_count = 3
-# -------------
+input_shape = (image_size[0], image_size[1], 1)
+categories_count = 2
 
 models = {
     'transfered_model': TransferedModel,
@@ -30,11 +27,12 @@ def plot_history_diff(initial_hist, transfered_hist):
     plt.grid(True)
     plt.legend()
     plt.xlabel('Epoch')
+    plt.title("Far Transfer from Facial Recognition to Cats vs Dogs")
+    plt.savefig("section8_transfer_plot.png", dpi=150, bbox_inches="tight")
     plt.show()
 
 if __name__ == "__main__":
-    # Your code should change the number of epochs
-    epochs = 3
+    epochs = 15
     print('* Data preprocessing')
     train_dataset, validation_dataset, test_dataset = get_transfer_datasets()
     histories = []
@@ -49,4 +47,4 @@ if __name__ == "__main__":
         print('* Confusion Matrix for {}'.format(name))
         print(model.get_confusion_matrix(test_dataset))
     assert len(histories) == 2, "The number of trained models is not equal to two"
-    plot_history_diff(*histories)
+    plot_history_diff(histories[1], histories[0])

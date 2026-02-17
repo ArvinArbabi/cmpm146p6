@@ -1,7 +1,25 @@
+import os
 from config import BOARD_SIZE, categories, image_size
 from tensorflow.keras import models
+from tensorflow.keras.models import load_model
 import numpy as np
 import tensorflow as tf
+
+_MODEL_FILENAME = "basic_model_100_epochs_timestamp_1771304740.keras"
+
+def _get_model_path():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    p = os.path.join(script_dir, "results", _MODEL_FILENAME)
+    if os.path.isfile(p):
+        return p
+    cwd = os.getcwd()
+    p2 = os.path.join(cwd, "results", _MODEL_FILENAME)
+    if os.path.isfile(p2):
+        return p2
+    raise FileNotFoundError(
+        f"Model not found. Tried:\n  {p}\n  {p2}\n"
+        f"Put the .keras file in src/results/ and run from src/"
+    )
 
 class TicTacToePlayer:
     def get_move(self, board_state):
@@ -45,9 +63,13 @@ class UserWebcamPlayer:
         import cv2
         cv2.namedWindow("preview")
         vc = cv2.VideoCapture(0)
-        if vc.isOpened(): # try to get the first frame
+        frame = None
+        if vc.isOpened():  # try to get the first frame
             rval, frame = vc.read()
-            frame = self._process_frame(frame)
+            if rval:
+                frame = self._process_frame(frame)
+            else:
+                rval = False
         else:
             rval = False
         while rval:
@@ -60,7 +82,7 @@ class UserWebcamPlayer:
 
         vc.release()
         cv2.destroyWindow("preview")
-        return frame
+        return frame  # may be None if camera never opened
 
     def _print_reference(self, row_or_col):
         print('reference:')
@@ -80,6 +102,9 @@ class UserWebcamPlayer:
             row_or_col = 'row' if is_row else 'col'
             self._print_reference(row_or_col)
             img = self._access_webcam()
+            if img is None:
+                print('Camera unavailable. Use text input (enter 0, 1, or 2):')
+                return self._get_row_or_col_by_text()
             emotion = self._get_emotion(img)
             if type(emotion) is not int or emotion not in range(len(categories)):
                 print('Invalid emotion number {}'.format(emotion))
@@ -94,21 +119,14 @@ class UserWebcamPlayer:
             raise e
     
     def _get_emotion(self, img) -> int:
-        # Your code goes here
-        #
-        # img an np array of size NxN (square), each pixel is a value between 0 to 255
-        # you have to resize this to image_size before sending to your model
-        # to show the image here, you can use:
-        # import matplotlib.pyplot as plt
-        # plt.imshow(img, cmap='gray', vmin=0, vmax=255)
-        # plt.show()
-        #
-        # You have to use your saved model, use resized img as input, and get one classification value out of it
-        # The classification value should be 0, 1, or 2 for neutral, happy or surprise respectively
-
-        # return an integer (0, 1 or 2), otherwise the code will throw an error
-        return 1
-        pass
+        if getattr(self, '_model', None) is None:
+            path = os.path.realpath(_get_model_path())
+            self._model = load_model(path)
+        img = cv2.resize(img, image_size)
+        img = np.expand_dims(img, axis=-1).astype(np.float32) / 255.0
+        img_batch = np.expand_dims(img, axis=0)
+        pred = self._model.predict(img_batch, verbose=0)
+        return int(np.argmax(pred[0]))
     
     def get_move(self, board_state):
         row, col = None, None
