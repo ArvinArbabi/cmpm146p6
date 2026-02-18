@@ -20,6 +20,18 @@ src/kaggle/
 
 # PDF assignment doc
 *.pdf
+# Except report PDFs
+!src/reports/*.pdf
 
 # LaTeX
 *.tex
+
+# Generated plots
+src/section*.png
+src/reports/section*.png
+src/section8_transfer_plot.png
+src/reports/section8_transfer_plot.png
+
+# Plot generation scripts
+src/generate_plots.py
+src/generate_transfer_plot.py
